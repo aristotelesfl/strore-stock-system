@@ -10,6 +10,15 @@ typedef struct{
     char name[20];
 }Stock;
 
+int search_id(int id, Stock db[], int size_db){
+    for (int index=0; index<size_db; index++){
+        if(id==db[index].id){
+            return 1;
+        }
+    }
+    return 0;
+}
+
 Stock __init__(Stock product,int id, char name[20], float price, int quantity){
     product.id = id;
     strcpy(product.name, name);
@@ -18,29 +27,45 @@ Stock __init__(Stock product,int id, char name[20], float price, int quantity){
     return product;
 }
 
-Stock create_product(){
-    Stock product;
-    unsigned int id, quantity;
+Stock create_product(Stock db[], int size_db){
+    Stock new_product;
+    unsigned int id, quantity, product_in_stock;
     float price;
     char name[20];
     printf("___Cadastrar novo produto___\n");
-    printf("Código do produto: ");
-    scanf("%d", &id);
+    do{
+        printf("Código do produto: ");
+        scanf("%d", &id);
+        product_in_stock = search_id(id, db, size_db);
+        if (product_in_stock==1){
+            printf("Produto já cadastrado no sistema!\n");
+        }
+    }while(product_in_stock!=0);
+    scanf("%*[^\n]"); scanf("%*c");
     printf("Nome do produto: ");
-    scanf("%s", name);
+    scanf("%[^\n]", name);
     printf("Preço unitário de %s: ", name);
     scanf("%f", &price);
     printf("Quantidade de %s: ", name);
     scanf("%d", &quantity);
-    product = __init__(product, id, name, price, quantity);
+    new_product = __init__(new_product, id, name, price, quantity);
     printf("___Novo produto cadastrado com sucesso___\n");
-    return product;
+    return new_product;
 }
 
-void main(void){
+int main(void){
     Stock *db;
-    int index = 0;
-    db = (Stock*)malloc(index*sizeof(Stock));
-    db[index] = create_product();
-    printf("%d", db[index].quantity);
+    db = (Stock*)malloc(1*sizeof(Stock));
+    if (db == NULL) {
+        printf("Erro ao alocar memória\n");
+        return 0;
+    }
+    for (int i=0; i<2; i++){
+        db = (Stock*)realloc(db ,(i+1)*sizeof(Stock));
+        if (db == NULL) {
+            printf("Erro ao realocar memória\n");
+            return 0;
+        }
+        db[i] = create_product(db, i+1);
+    }
 }
